@@ -66,8 +66,14 @@ sub fix_perms
 	&mysystem("chown -R root:root $dir");
 	&mysystem("chown -R $user:$user $dir");
 	&mysystem("chmod 770 $dir");
-	&mysystem("chmod 660 $dir/memcached.sock");
-	&mysystem("chmod 660 $dir/memcached.pid");
+	if ( -e "$dir/memcached.sock" )
+	{
+		&mysystem("chmod 660 $dir/memcached.sock");
+	}
+	if ( -e "$dir/memcached.pid" )
+	{
+		&mysystem("chmod 660 $dir/memcached.pid");
+	}
 }
 
 sub setup_scripts
