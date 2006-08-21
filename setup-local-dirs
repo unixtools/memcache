@@ -89,8 +89,8 @@ sub setup_scripts
 	print OUT "cd $dir\n";
 	print OUT "echo Starting memcached in $dir\n";
 	print OUT "rm -f $dir/memcached.sock\n";
-	# for now force to 16, we can do a config file later to overide if needed
-	print OUT "su $user -s /bin/sh -c \"/local/memcache/bin/memcached -s $dir/memcached.sock -P $dir/memcached.pid -m 16 -d\"\n";
+	# for now force to 32, we can do a config file later to overide if needed
+	print OUT "su $user -s /bin/sh -c \"/local/memcache/bin/memcached -s $dir/memcached.sock -P $dir/memcached.pid -m 32 -d\"\n";
 	close(OUT);
 	&mysystem("chmod 700 $dir/start");
 
