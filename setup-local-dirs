@@ -121,6 +121,7 @@ sub setup_scripts
 	print OUT "if [ -e memcached.pid ]; then\n";
 	print OUT "echo Stopping memcached in $dir with pid \`cat memcached.pid\`\n";
 	print OUT "kill \`cat memcached.pid\`\n";
+	print OUT "su $user -s /bin/sh -c \"killall memcached\"\n";
 	print OUT "sleep 2\n";
 	print OUT "fi\n";
 	print OUT "rm -f $dir/memcached.pid $dir/memcached.sock\n";
