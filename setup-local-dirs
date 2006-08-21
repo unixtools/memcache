@@ -1,0 +1,119 @@
+#!/usr/bin/perl
+$| = 1;
+
+print "Scanning for local memcache directories to update...\n";
+
+# Make sure we are running the most current code
+if ( $ARGV[0] ne "--skip-svn" )
+{
+	my @tmp1 = stat("/local/memcache/setup-local-dirs");
+	chdir("/local/memcache") || die "failed to switch to /local/memcache";
+	system("svn update");
+	my @tmp2 = stat("/local/memcache/setup-local-dirs");
+	if ( $tmp1[9] != $tmp2[9] )
+	{
+		print "Restarting update script, file changed.\n";
+		exec( "/local/memcache/setup-local-dirs", "--skip-svn" );
+		exit;
+	}
+}
+
+opendir( DIR, "/local" );
+while ( $file = readdir(DIR) )
+{
+	if ( $file eq "memcache-root" || $file =~ /memcache-root-.*/ )
+	{
+		print "Found install at: /local/$file\n";
+
+		if ( $file eq "memcache-root" )
+		{
+			$user = "memcache";
+		}
+		elsif ( $file =~ /memcache-root-(.*)$/o )
+		{
+			$user = $1;
+		}
+
+		if ( $user eq "" )
+		{
+			die "Unable to determine user for /local/$file.\n";
+		}
+
+		if ( ! getpwnam($user) )
+		{
+			die "Unable to look up user $user.\n";
+		}
+	
+		print "Fixing perms for /local/$file for user $user.\n";
+		&fix_perms( "/local/$file", $user );
+
+		print "Updating scripts for /local/$file.\n";
+		&setup_scripts("/local/$file");
+	}
+}
+
+sub mysystem
+{
+	my ($cmd) = @_;
+	print "+ $cmd\n";
+	system($cmd);
+}
+
+sub fix_perms
+{
+	my ( $dir, $user ) = @_;
+
+	&mysystem("chown -R root:root $dir");
+	&mysystem("chown -R $user:$user $dir");
+	&mysystem("chmod 770 $dir");
+	&mysystem("chmod 660 $dir/memcached.sock");
+	&mysystem("chmod 660 $dir/memcached.pid");
+}
+
+sub setup_scripts
+{
+	my ($dir) = @_;
+
+	#
+	# First start
+	#
+	unlink("$dir/start");
+	open( OUT, ">$dir/start" );
+	print OUT "#!/bin/sh\n";
+	print OUT "cd $dir\n";
+	print OUT "echo Starting memcached in $dir\n";
+	print OUT "rm -f $dir/memcached.sock\n";
+	# for now force to 16, we can do a config file later to overide if needed
+	print OUT "/local/memcache/bin/memcached -s $dir/memcached.sock -P $dir/memcached.pid -m 16 -d\n";
+	close(OUT);
+	&mysystem("chmod 700 $dir/start");
+
+	#
+	# And stop
+	#
+	unlink("$dir/stop");
+	open( OUT, ">$dir/stop" );
+	print OUT "#!/bin/sh\n";
+	print OUT "cd $dir\n";
+	print OUT "if [ -e memcached.pid ]; then\n";
+	print OUT "echo Stopping memcached in $dir with pid \`cat memcached.pid\`\n";
+	print OUT "kill \`cat memcached.pid\`\n";
+	print OUT "sleep 2\n";
+	print OUT "fi\n";
+	print OUT "rm -f $dir/memcached.pid $dir/memcached.sock\n";
+	close(OUT);
+	&mysystem("chmod 700 $dir/stop");
+
+	#
+	# And restart
+	#
+	unlink("$dir/restart");
+	open( OUT, ">$dir/restart" );
+	print OUT "#!/bin/sh\n";
+	print OUT "cd $dir\n";
+	print OUT "./stop\n";
+	print OUT "sleep 1\n";
+	print OUT "./start\n";
+	close(OUT);
+	&mysystem("chmod 700 $dir/restart");
+}

@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+$| = 1;
+
+print "Scanning for local memcache directories to stop...\n";
+
+opendir( DIR, "/local" );
+while ( $file = readdir(DIR) )
+{
+	if ( $file eq "memcache-root" || $file =~ /memcache-root-.*/ )
+	{
+		if ( -e "/local/$file/reload" )
+		{
+			&mysystem("/local/$file/stop");
+		}
+	}
+}
+closedir(DIR);
+
+sub mysystem
+{
+	my ($cmd) = @_;
+	print "+ $cmd\n";
+	system($cmd);
+}
