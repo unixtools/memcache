@@ -52,6 +52,23 @@ while ( $file = readdir(DIR) )
 	}
 }
 
+unlink("/home/local/adm/rc-start/rc.400.memcached");
+open(OUT, ">/home/local/adm/rc-start/rc.400.memcached");
+print OUT "#!/bin/sh\n";
+print OUT "/local/memcache/stop-all\n";
+print OUT "/local/memcache/start-all\n";
+close(OUT);
+system("chmod 755 /home/local/adm/rc-start/rc.400.memcached");
+
+unlink("/home/local/adm/rc-stop/rc.400.memcached");
+open(OUT, ">/home/local/adm/rc-stop/rc.400.memcached");
+print OUT "#!/bin/sh\n";
+print OUT "/local/memcache/stop-all\n";
+close(OUT);
+system("chmod 755 /home/local/adm/rc-stop/rc.400.memcached");
+
+
+
 sub mysystem
 {
 	my ($cmd) = @_;
