@@ -107,6 +107,18 @@ sub setup_scripts
 	print OUT "echo Starting memcached in $dir\n";
 	print OUT "rm -f $dir/memcached.sock\n";
 	# for now force to 32, we can do a config file later to overide if needed
+	my $memsize;
+	if ( -e "$dir/memcache-size" )
+	{
+		open(IN, "$dir/memcache-size");
+		chomp($memsize = <IN>);
+		$memsize = int($memsize);
+		close(IN);
+	}
+	if ( $memsize > 500 || $memsize < 16 )
+	{
+		$memsize = 32;
+	}
 	print OUT "su $user -s /bin/sh -c \"/local/memcache/bin/memcached -s $dir/memcached.sock -P $dir/memcached.pid -m 32 -d\"\n";
 	close(OUT);
 	&mysystem("chmod 700 $dir/start");
