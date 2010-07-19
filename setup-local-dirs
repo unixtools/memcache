@@ -97,6 +97,12 @@ sub setup_scripts
 {
 	my ($dir, $user) = @_;
 
+	my $exe = "/local/memcache/bin/memcached";
+	if ( -e "/usr/sbin/memcached" )
+	{
+		$exe = "/usr/sbin/memcached";
+	}
+
 	#
 	# First start
 	#
@@ -124,7 +130,7 @@ sub setup_scripts
 	{
 		$memsize = 32;
 	}
-	print OUT "su $user -s /bin/sh -c \"/local/memcache/bin/memcached -s $dir/memcached.sock -P $dir/memcached.pid -m $memsize -d\"\n";
+	print OUT "su $user -s /bin/sh -c \"$exe -s $dir/memcached.sock -P $dir/memcached.pid -m $memsize -d\"\n";
 	close(OUT);
 	&mysystem("chmod 700 $dir/start");
 
