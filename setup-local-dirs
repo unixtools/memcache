@@ -100,7 +100,7 @@ sub setup_scripts
 	my $exe = "/local/memcache/bin/memcached";
 	if ( -e "/usr/sbin/memcached" )
 	{
-		$exe = "/usr/sbin/memcached";
+		$exe = "/usr/bin/memcached";
 	}
 
 	#
