@@ -97,11 +97,7 @@ sub setup_scripts
 {
 	my ($dir, $user) = @_;
 
-	my $exe = "/local/memcache/bin/memcached";
-	if ( -e "/usr/bin/memcached" )
-	{
-		$exe = "/usr/bin/memcached";
-	}
+	my $exe = "/usr/bin/memcached";
 
 	#
 	# First start
