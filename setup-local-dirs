@@ -4,16 +4,16 @@ $| = 1;
 print "Scanning for local memcache directories to update...\n";
 
 # Make sure we are running the most current code
-if ( $ARGV[0] ne "--skip-svn" )
+if ( $ARGV[0] ne "--skip-git" )
 {
 	my @tmp1 = stat("/local/memcache/setup-local-dirs");
 	chdir("/local/memcache") || die "failed to switch to /local/memcache";
-	system("svn update");
+	system("git pull");
 	my @tmp2 = stat("/local/memcache/setup-local-dirs");
 	if ( $tmp1[9] != $tmp2[9] )
 	{
 		print "Restarting update script, file changed.\n";
-		exec( "/local/memcache/setup-local-dirs", "--skip-svn" );
+		exec( "/local/memcache/setup-local-dirs", "--skip-git" );
 		exit;
 	}
 }
